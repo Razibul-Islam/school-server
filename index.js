@@ -90,6 +90,13 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/single-notice", async (req, res) => {
+      const _id = req.query._id;
+      const query = { _id: new ObjectId(_id) };
+      const result = await NoticeCollection.findOne(query);
+      res.send(result);
+    });
+
     app.delete("/delete-notice", async (req, res) => {
       const _id = req.query._id;
       const query = { _id: new ObjectId(_id) };
@@ -102,6 +109,13 @@ async function run() {
     app.post("/add-news", async (req, res) => {
       const data = req.body;
       const result = await NewsCollection.insertOne(data);
+      res.send(result);
+    });
+
+    app.get("/get-news-single-view", async (req, res) => {
+      const _id = req.query._id;
+      const query = { _id: new ObjectId(_id) };
+      const result = await NewsCollection.findOne(query);
       res.send(result);
     });
 
