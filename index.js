@@ -20,6 +20,13 @@ const StudentCollection = client.db("test").collection("student");
 const NoticeCollection = client.db("test").collection("notice");
 const NewsCollection = client.db("test").collection("news");
 const InfoCollection = client.db("test").collection("info");
+const GalleryCollection = client.db("test").collection("Gallery");
+const RutinCollection = client.db("test").collection("Rutin");
+const CabinetCollection = client.db("test").collection("cabinet");
+const InstituteInformationCollection = client
+  .db("test")
+  .collection("instituteInfo");
+const failStudentCollection = client.db("test").collection("fail");
 // school_management
 
 async function run() {
@@ -40,10 +47,59 @@ async function run() {
       const result = await TeacherCollection.find(query).toArray();
       res.send(result);
     });
+    app.get("/single-teacher", async (req, res) => {
+      const { _id } = req.query;
+      const query = { _id: new ObjectId(_id) };
+      const result = await TeacherCollection.findOne(query);
+      res.send(result);
+    });
     app.delete("/delete-teacher", async (req, res) => {
       const _id = req.query._id;
       const query = { _id: new ObjectId(_id) };
       const result = await TeacherCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // student cabinet
+
+    app.post("/add-cabinet", async (req, res) => {
+      const data = req.body;
+      const result = await CabinetCollection.insertOne(data);
+      res.send(result);
+    });
+
+    app.get("/get-cabinet", async (req, res) => {
+      const query = {};
+      const result = await CabinetCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    app.put("/update-cabinet", async (req, res) => {
+      const data = req.body;
+      const _id = data.id;
+      const query = { _id: new ObjectId(_id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          Name: data.Name,
+          EIIN: data.EIIN,
+          Member: data.Member,
+          Ready: data.Ready,
+          LastUpdate: data.LastUpdate,
+        },
+      };
+      const result = await CabinetCollection.updateOne(
+        query,
+        updateDoc,
+        options
+      );
+      res.send(result);
+    });
+
+    app.delete("/delete-cabinet", async (req, res) => {
+      const { _id } = req.query;
+      const query = { _id: new ObjectId(_id) };
+      const result = await CabinetCollection.deleteOne(query);
       res.send(result);
     });
 
@@ -60,7 +116,7 @@ async function run() {
       const query = { class_id: class_id };
       const result = await StudentCollection.find(query).toArray();
       res.send(result);
-      console.log(class_id);
+      // console.log(class_id);
     });
 
     app.get("/get-allStudent", async (req, res) => {
@@ -73,6 +129,82 @@ async function run() {
       const _id = req.query._id;
       const query = { _id: new ObjectId(_id) };
       const result = await StudentCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    app.put("/update-student", async (req, res) => {
+      const data = req.body;
+      const _id = data.id;
+      const query = { _id: new ObjectId(_id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          name: data.name,
+          role: data.role,
+          yourClass: data.yourClass,
+          father_name: data.father_name,
+          mother_name: data.mother_name,
+          dipperment: data.dipperment,
+          phone: data.phone,
+          address: data.address,
+          date_of_birth: data.date_of_birth,
+        },
+      };
+      const result = await StudentCollection.updateOne(
+        query,
+        updateDoc,
+        options
+      );
+      res.send(result);
+    });
+
+    app.get("/single-student", async (req, res) => {
+      const { _id } = req.query;
+      const query = { _id: new ObjectId(_id) };
+      const result = await StudentCollection.findOne(query);
+      res.send(result);
+    });
+
+    // Fail Student
+    app.post("/post-fail-student", async (req, res) => {
+      const data = req.body;
+      const result = await failStudentCollection.insertOne(data);
+      res.send(result);
+    });
+
+    app.put("/edit-fail-student", async (req, res) => {
+      const { _id } = req.query;
+      const data = req.body;
+      const query = { _id: new ObjectId(_id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          classes: data.classes,
+          department: data.department,
+          group: data.group,
+          failedMaleStudent: data.failedMaleStudent,
+          failedFemaleStudent: data.failedFemaleStudent,
+          year: data.year,
+        },
+      };
+      const result = await failStudentCollection.updateOne(
+        query,
+        updateDoc,
+        options
+      );
+      res.send(result);
+    });
+
+    app.get("/get-fail-student", async (req, res) => {
+      const query = {};
+      const result = await failStudentCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    app.delete("/delete-fail-student", async (req, res) => {
+      const { _id } = req.query;
+      const query = { _id: new ObjectId(_id) };
+      const result = await failStudentCollection.deleteOne(query);
       res.send(result);
     });
 
@@ -90,17 +222,17 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/single-notice", async (req, res) => {
-      const _id = req.query._id;
-      const query = { _id: new ObjectId(_id) };
-      const result = await NoticeCollection.findOne(query);
-      res.send(result);
-    });
-
     app.delete("/delete-notice", async (req, res) => {
       const _id = req.query._id;
       const query = { _id: new ObjectId(_id) };
       const result = await NoticeCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    app.get("/single-notice", async (req, res) => {
+      const _id = req.query._id;
+      const query = { _id: new ObjectId(_id) };
+      const result = await NoticeCollection.findOne(query);
       res.send(result);
     });
 
@@ -112,6 +244,12 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/get-news", async (req, res) => {
+      const query = {};
+      const result = await NewsCollection.find(query).toArray();
+      res.send(result);
+    });
+
     app.get("/get-news-single-view", async (req, res) => {
       const _id = req.query._id;
       const query = { _id: new ObjectId(_id) };
@@ -119,13 +257,14 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/get-news", async (req, res) => {
-      const query = {};
-      const result = await NewsCollection.find(query).toArray();
+    app.delete("/delete-news", async (req, res) => {
+      const _id = req.query._id;
+      const query = { _id: new ObjectId(_id) };
+      const result = await NewsCollection.deleteOne(query);
       res.send(result);
     });
 
-    // school information
+    // Institute information
 
     app.put("/school-information", async (req, res) => {
       const data = req.body;
@@ -146,6 +285,102 @@ async function run() {
 
     app.get("/information", async (req, res) => {
       const result = await InfoCollection.findOne({});
+      res.send(result);
+    });
+
+    app.post("/add-school-information", async (req, res) => {
+      const data = req.body;
+      const result = await InstituteInformationCollection.insertOne(data);
+      res.send(result);
+    });
+
+    app.get("/get-institute-info", async (req, res) => {
+      const query = {};
+      const result = await InstituteInformationCollection.findOne(query);
+      res.send(result);
+    });
+
+    app.put("/edit-institute-information", async (req, res) => {
+      const data = req.body;
+      const _id = data.id;
+      const query = { _id: new ObjectId(_id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          instituteName: data.instituteName,
+          instituteType: data.instituteType,
+          instituteCode: data.instituteCode,
+          mpoCode: data.mpoCode,
+          stipendCode: data.stipendCode,
+          district: data.district,
+          ParliamentarySeat: data.ParliamentarySeat,
+          mainBuildingName: data.mainBuildingName,
+          Union: data.Union,
+          PostCode: data.PostCode,
+          instituteMobile: data.instituteMobile,
+          instituteHeadName: data.instituteHeadName,
+          fax: data.fax,
+          webAddress: data.webAddress,
+          EIIN: data.EIIN,
+          geoCode: data.geoCode,
+          BTEBCode: data.BTEBCode,
+          BTEBMpoCode: data.BTEBMpoCode,
+          region: data.region,
+          Upazila: data.Upazila,
+          Village_HoldingNo: data.Village_HoldingNo,
+          postOffice: data.postOffice,
+          Founder: data.Founder,
+          instituteHeadMobile: data.instituteHeadMobile,
+          instituteEmail: data.instituteHeadMobile,
+        },
+      };
+      const result = await InstituteInformationCollection.updateOne(
+        query,
+        updateDoc,
+        options
+      );
+      res.send(result);
+    });
+
+    // add gallery -------------------------------
+
+    app.post("/add-gallery", async (req, res) => {
+      const data = req.body;
+      const result = await GalleryCollection.insertOne(data);
+      res.send(result);
+    });
+
+    app.get("/gallery", async (req, res) => {
+      const query = {};
+      const result = await GalleryCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    app.delete("/gallery", async (req, res) => {
+      const { _id } = req.query;
+      const query = { _id: new ObjectId(_id) };
+      const result = await GalleryCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // rutine
+
+    app.post("/add-rutine", async (req, res) => {
+      const data = req.body;
+      const result = await RutinCollection.insertOne(data);
+      res.send(result);
+    });
+
+    app.get("/rutin", async (req, res) => {
+      const query = {};
+      const result = await RutinCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    app.delete("/delete-rutin", async (req, res) => {
+      const { _id } = req.query;
+      const query = { _id: new ObjectId(_id) };
+      const result = await RutinCollection.deleteOne(query);
       res.send(result);
     });
   } finally {
