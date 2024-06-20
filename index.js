@@ -8,25 +8,26 @@ app.use(cors());
 app.use(express.json());
 
 const uri =
-  "mongodb+srv://school_management:school_management@cluster0.et9phym.mongodb.net/?retryWrites=true&w=majority";
+  "mongodb+srv://schoolManagement:SchoolManagement@cluster0.bg9rqij.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   serverApi: ServerApiVersion.v1,
 });
 
-const TeacherCollection = client.db("test").collection("teacher");
-const StudentCollection = client.db("test").collection("student");
-const NoticeCollection = client.db("test").collection("notice");
-const NewsCollection = client.db("test").collection("news");
-const InfoCollection = client.db("test").collection("info");
-const GalleryCollection = client.db("test").collection("Gallery");
-const RutinCollection = client.db("test").collection("Rutin");
-const CabinetCollection = client.db("test").collection("cabinet");
+const TeacherCollection = client.db("school-management").collection("teacher");
+const StudentCollection = client.db("school-management").collection("student");
+const NoticeCollection = client.db("school-management").collection("notice");
+const NewsCollection = client.db("school-management").collection("news");
+const InfoCollection = client.db("school-management").collection("info");
+const GalleryCollection = client.db("school-management").collection("Gallery");
+const RutinCollection = client.db("school-management").collection("Rutin");
+const SMCCollection = client.db("school-management").collection("smc");
+const CabinetCollection = client.db("school-management").collection("cabinet");
 const InstituteInformationCollection = client
-  .db("test")
+  .db("school-management")
   .collection("instituteInfo");
-const failStudentCollection = client.db("test").collection("fail");
+const failStudentCollection = client.db("school-management").collection("fail");
 // school_management
 
 async function run() {
@@ -111,14 +112,6 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/get-student", async (req, res) => {
-      const class_id = req.query.class_id;
-      const query = { class_id: class_id };
-      const result = await StudentCollection.find(query).toArray();
-      res.send(result);
-      // console.log(class_id);
-    });
-
     app.get("/get-allStudent", async (req, res) => {
       const query = {};
       const result = await StudentCollection.find(query).toArray();
@@ -163,6 +156,39 @@ async function run() {
       const query = { _id: new ObjectId(_id) };
       const result = await StudentCollection.findOne(query);
       res.send(result);
+    });
+
+    // SMC
+
+    app.post("/add-smc-counsil", async (req, res) => {
+      const data = req.body;
+      const result = await SMCCollection.insertOne(data);
+      res.send(result);
+    });
+
+    app.get("/get-smc-counsil", async (req, res) => {
+      const query = {};
+      const result = await SMCCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    app.delete("/delete-smc", async (req, res) => {
+      const { _id } = req.query;
+      if (!_id) {
+        return res.status(400).send({ error: "Missing _id parameter" });
+      }
+
+      try {
+        const query = { _id: new ObjectId(_id) };
+        const deletedSMC = await SMCCollection.deleteOne(query);
+        if (!deletedSMC) {
+          return res.status(404).send({ error: "SMC not found" });
+        }
+        res.send({ message: "SMC deleted successfully" });
+      } catch (error) {
+        console.error("Error deleting SMC:", error);
+        res.status(500).send({ error: "Internal server error" });
+      }
     });
 
     // Fail Student
@@ -331,7 +357,7 @@ async function run() {
           postOffice: data.postOffice,
           Founder: data.Founder,
           instituteHeadMobile: data.instituteHeadMobile,
-          instituteEmail: data.instituteHeadMobile,
+          instituteEmail: data.instituteEmail,
         },
       };
       const result = await InstituteInformationCollection.updateOne(
